@@ -25,8 +25,8 @@ key = "messages"
 inner_key = "message"
 
 objects = parse_json(json_text=json_text, key=key)
-second_object = objects[1]
 if objects:
+    second_object = objects[1]
     if inner_key in second_object:
         print(second_object[inner_key])
     else:

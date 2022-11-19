@@ -38,9 +38,11 @@ for r in method_types:
                          "method_in_params": "none",
                          "status_code": response.status_code,
                          "text": response.text})
+
 unsupported_request = []
 right_method_for_request = []
 no_method = []
+
 for result in results_list:
     if result['request'] != result['method_in_params'] and result['text'] == '{"success":"!"}' \
             or result['request'] == result['method_in_params'] \
@@ -54,7 +56,9 @@ for result in results_list:
         right_method_for_request.append(result)
     if result['method_in_params'] == 'none':
         no_method.append(result)
+
 print(f''' Пример правильного сочетания запроса и метолда в параметрах: {right_method_for_request[0]} 
            Пример запроса не из списка: {unsupported_request[0]}
            Пример запроса без параметра method: {no_method[0]} 
       ''')
+

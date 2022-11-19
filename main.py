@@ -1,15 +1,12 @@
 import requests
 
-# def hello_from(name):
-# return f'Hello from {name}'
+payload = {"login": "secret_login", "password": "secret_pass2"}
+response1 = requests.post("https://playground.learnqa.ru/api/get_auth_cookie", data=payload)
+cookie_value = response1.cookies.get('auth_cookie')
+cookies = {}
+if cookie_value:
+    cookies.update({'auth_cookie': cookie_value})
 
+response2 = requests.post("https://playground.learnqa.ru/api/check_auth_cookie", cookies=cookies)
 
-# print(hello_from('Elizaveta'))
-
-response = requests.post("https://playground.learnqa.ru/api/get_301",
-                        allow_redirects=True)
-first_response = response.history[0]
-second_response = response
-
-print(first_response.url)
-print(second_response.url)
+print(response2.text)

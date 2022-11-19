@@ -18,24 +18,37 @@ def create_job_and_get_response(url, token=None):
 
 
 url = "https://playground.learnqa.ru/ajax/api/longtime_job"
+exception_message = "Что-то пошло не так..."
+
 first_response = create_job_and_get_response(url=url)
-token = first_response["token"]
-seconds = first_response["seconds"]
-status = create_job_and_get_response(url=url, token=token)["status"]
-if status and status == "Job is NOT ready":
-    print(f"Звпущен процесс создания задачи. Подождите {seconds} секунд...")
+
+if "token" in first_response and "seconds" in first_response:
+    token = first_response["token"]
+    seconds = first_response["seconds"]
 else:
-    raise Exception("Что-то пошло не так...")
+    raise Exception(exception_message)
+
+second_response = create_job_and_get_response(url=url, token=token)
+
+if "status" in second_response and second_response["status"] == "Job is NOT ready":
+    print(f"Запущен процесс создания задачи. Подождите {seconds} секунд...")
+else:
+    raise Exception(exception_message)
 
 time.sleep(seconds)
 
-second_response = create_job_and_get_response(url=url, token=token)
-status = second_response["status"]
-if not status:
-    raise Exception("Что-то пошло не так...")
-if second_response["result"] and status == "Job is ready":
-    result = second_response["result"]
-    print(f"Задача создана. Статус: {status}. Результат: {result}")
+third_response = create_job_and_get_response(url=url, token=token)
+
+if "status" in third_response:
+    status = third_response["status"]
 else:
-    error = second_response["error"]
+    raise Exception(exception_message)
+
+if "result" in third_response and status == "Job is ready":
+    result = third_response["result"]
+    print(f"Задача создана. Статус: {status}. Результат: {result}")
+elif "error" in third_response:
+    error = third_response["error"]
     print(f"Ошибка! {error}")
+else:
+    raise Exception(exception_message)

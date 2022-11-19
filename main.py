@@ -10,3 +10,7 @@ if cookie_value:
 response2 = requests.post("https://playground.learnqa.ru/api/check_auth_cookie", cookies=cookies)
 
 print(response2.text)
+
+url = "https://playground.learnqa.ru/api/homework_cookie"
+response = requests.get(url=url)
+print(response.cookies)

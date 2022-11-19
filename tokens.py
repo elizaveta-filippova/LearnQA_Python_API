@@ -14,7 +14,7 @@ def create_job_and_get_response(url, token=None):
         response_dict = response.json()
         return response_dict
     except JSONDecodeError:
-        print('Response is not in JSON format')
+        print("Ответ не в формате JSON")
 
 
 url = "https://playground.learnqa.ru/ajax/api/longtime_job"

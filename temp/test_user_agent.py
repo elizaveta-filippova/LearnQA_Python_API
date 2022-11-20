@@ -1,33 +1,38 @@
+from json import JSONDecodeError
+
 import pytest
 import requests
 
+from test_data.user_agent import user_agents_tuple_list, response_jsons_list
+
 
 class TestUserAgent:
-    user_agents = [
-        (
-            'Mozilla/5.0 (Linux; U; Android 4.0.2; en-us; Galaxy Nexus Build/ICL53F) '
-            'AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
-        ),
-        (
-            'Mozilla/5.0 (iPad; CPU OS 13_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) '
-            'CriOS/91.0.4472.77 Mobile/15E148 Safari/604.1'
-        ),
-        (
-            'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
-        ),
-        (
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/91.0.4472.77 Safari/537.36 Edg/91.0.100.0'
-        ),
-        (
-            'Mozilla/5.0 (iPad; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) '
-            'Version/13.0.3 Mobile/15E148 Safari/604.1'
-        )
-    ]
+    user_agents = user_agents_tuple_list
 
     @pytest.mark.parametrize('user_agent', user_agents)
     def test_user_agent(self, user_agent):
         url = "https://playground.learnqa.ru/ajax/api/user_agent_check"
-        params = {"User-Agent": user_agent}
-        response = requests.get(url=url, params=params)
+        headers = {"User-Agent": user_agent[0]}
+        response = requests.get(url=url, headers=headers)
+        try:
+            response_dict = response.json()
+        except JSONDecodeError:
+            assert False, f"Response is not in JSON format, response text is '{response.text}'"
+
+        expected_response = {}
+        for dict in response_jsons_list:
+            if dict.get('user_agent') == user_agent[0]:
+                expected_response = dict
+
+        assert response_dict['user_agent'] == expected_response['user_agent'], f"The actual user-agent value " \
+                                                                               f"is not equal to the expected one " \
+                                                                               f"({user_agent})"
+        assert response_dict['platform'] == expected_response['platform'], f"The actual platform parameter value " \
+                                                                            "is not equal to the expected one"
+        assert response_dict['browser'] == expected_response['browser'], f"The actual browser parameter value " \
+                                                                            "is not equal to the expected one"
+        assert response_dict['device'] == expected_response['device'], f"The actual device parameter value " \
+                                                                            "is not equal to the expected one"
+
+
 

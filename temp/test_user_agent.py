@@ -14,6 +14,8 @@ class TestUserAgent:
         url = "https://playground.learnqa.ru/ajax/api/user_agent_check"
         headers = {"User-Agent": user_agent[0]}
         response = requests.get(url=url, headers=headers)
+        assert response.status_code == 200, "The request wasn't executed successfully"
+
         try:
             response_dict = response.json()
         except JSONDecodeError:

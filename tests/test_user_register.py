@@ -39,8 +39,9 @@ class TestUserRegister(BaseCase):
         response = requests.post("https://playground.learnqa.ru/api/user/", data=data)
 
         Assertions.assert_code_status(response, 400)
-        assert response.content.decode("utf-8") == f"Users with email '{email}' already exists", \
-            f"Unexpected response content: {response.content}"
+        Assertions.assert_response_content(response, f"Users with email '{email}' already exists")
+
+
 
 
 

@@ -77,7 +77,7 @@ class TestUserRegister(BaseCase):
         Assertions.assert_response_content(response, f"The value of 'username' field is too short")
 
     def test_create_user_with_too_long_username(self):
-        username = random_string(random.randint(250, 1000))
+        username = random_string(random.randint(251, 1000))
         data = self.generate_data(username=username)
         response = requests.post(self.url, data=data)
 

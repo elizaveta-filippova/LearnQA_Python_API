@@ -1,7 +1,6 @@
 import requests
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
-from lib.data_generator import DataGenerator
 
 
 class TestUserGet(BaseCase):
@@ -9,11 +8,6 @@ class TestUserGet(BaseCase):
         'email': 'vinkotov@example.com',
         'password': '1234'
     }
-
-    def setup(self):
-        self._data_generator = DataGenerator()
-        self.email = self._data_generator.email
-        self.username = self._data_generator.username
 
     def test_get_user_details_not_auth(self):
         response = requests.get("https://playground.learnqa.ru/api/user/2")
@@ -36,7 +30,7 @@ class TestUserGet(BaseCase):
         Assertions.assert_json_has_keys(response2, expected_fields)
 
     def test_get_user_details_auth_as_another_user(self):
-        new_user_data = self._data_generator.generate_data()
+        new_user_data = self.prepare_registration_data()
         response1 = requests.post("https://playground.learnqa.ru/api/user/", data=new_user_data) # создаем нового пользователя
         new_user_id = self.get_json_value(response1, "id")
 
@@ -51,6 +45,8 @@ class TestUserGet(BaseCase):
 
         Assertions.assert_json_has_not_keys(response3, unexpected_fields)
         Assertions.assert_json_has_key(response3, expected_field)
+
+
 
 
 

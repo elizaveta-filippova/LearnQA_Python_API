@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-class DataGenerator():
+class DataGenerator:
 
     def __init__(self):
         base_part = "learnqa"

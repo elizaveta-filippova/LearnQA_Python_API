@@ -1,11 +1,9 @@
 import json.decoder
 
 from datetime import datetime
-
-import requests
 from requests import Response
-
 from lib.assertions import Assertions
+from lib.my_requests import MyRequests
 
 
 class BaseCase:
@@ -45,11 +43,11 @@ class BaseCase:
 
         return {key: value for key, value in zip(keys, values)}
 
-    def create_new_user_return_data(self, register_url, return_login_data: bool = None,
+    def create_new_user_return_data(self, register_uri, return_login_data: bool = None,
                                     return_user_id: bool = None):
         """Returns login data, user_id, or full user data including user_id if no parameter specified."""
         register_data = self.prepare_registration_data()
-        response = requests.post(register_url, data=register_data)
+        response = MyRequests.post(register_uri, data=register_data)
 
         Assertions.assert_code_status(response, 200)
         Assertions.assert_json_has_key(response, "id")

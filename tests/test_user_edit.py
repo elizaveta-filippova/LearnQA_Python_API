@@ -84,6 +84,7 @@ class TestUserEdit(BaseCase):
         email = register_data['email']
         password = register_data['password']
         user_id = self.get_json_value(response1, "id")
+        old_name = register_data['firstName']
 
         # LOGIN (TO GET TOKEN AND AUTH_SID)
         login_data = {
@@ -118,22 +119,44 @@ class TestUserEdit(BaseCase):
         Assertions.assert_code_status(response2, 400)
         Assertions.assert_response_content(response2, 'Auth token not supplied')
 
+        # GET USER, CHECK THAT FIRST NAME HASN'T BEEN EDITED
+        response4 = MyRequests.get(
+            url=get_uri_with_user_id(self.get_user_uri, user_id),
+            headers={'x-csrf-token': token},
+            cookies={'auth_sid': auth_sid}
+        )
+
+        Assertions.assert_json_value_by_name(
+            response4,
+            "firstName",
+            old_name,
+            "First name shouldn't have been changed"
+        )
+
     def test_edit_another_users_data(self):
-        my_created_user_data = self.create_new_user_return_data(register_uri=self.register_uri, return_login_data=True)
+        user_login_data = self.create_new_user_return_data(register_uri=self.register_uri, return_login_data=True)
         time.sleep(2)
 
-        # REGISTER NEW USER AND GET THEIR ID
-        new_user_id = self.create_new_user_return_data(register_uri=self.register_uri, return_user_id=True)
+        # REGISTER NEW USER AND GET THEIR DATA
+        full_user_data = self.create_new_user_return_data(register_uri=self.register_uri)
+        user_id = full_user_data['user_id']
+        old_name = full_user_data['firstName']
+        email = full_user_data['email']
+        password = full_user_data['password']
+        new_user_login_data = {
+            'email': email,
+            'password': password
+        }
 
         # LOGIN AS AN EXISTING USER AND GET AUTH_SID AND TOKEN
-        response1 = MyRequests.post(self.login_uri, data=my_created_user_data)
+        response1 = MyRequests.post(self.login_uri, data=user_login_data)
         auth_sid = self.get_cookie(response1, "auth_sid")
         token = self.get_header(response1, "x-csrf-token")
 
         # TRY TO EDIT THE PREVIOUSLY CREATED USER
         new_name = "Changed name"
         response2 = MyRequests.put(
-            get_uri_with_user_id(self.edit_user_uri, new_user_id),
+            get_uri_with_user_id(self.edit_user_uri, user_id),
             cookies={"auth_sid": auth_sid},
             headers={"x-csfr-token": token},
             data={'firstName': new_name}
@@ -141,6 +164,25 @@ class TestUserEdit(BaseCase):
 
         Assertions.assert_code_status(response2, 400)
         Assertions.assert_response_content(response2, 'Auth token not supplied')
+
+        # LOGIN AS PREVIOUSLY CREATED USER, GET DATA AND CHECK THAT FIRST NAME HASN'T BEEN EDITED
+
+        response3 = MyRequests.post(self.login_uri, data=new_user_login_data)
+        auth_sid = self.get_cookie(response3, "auth_sid")
+        token = self.get_header(response3, "x-csrf-token")
+
+        response4 = MyRequests.get(
+            url=get_uri_with_user_id(self.get_user_uri, user_id),
+            headers={'x-csrf-token': token},
+            cookies={'auth_sid': auth_sid}
+        )
+
+        Assertions.assert_json_value_by_name(
+            response4,
+            "firstName",
+            old_name,
+            "First name shouldn't have been changed"
+        )
 
     def test_edit_email_put_wrong_value(self):
         # REGISTER
@@ -171,6 +213,19 @@ class TestUserEdit(BaseCase):
         Assertions.assert_code_status(response3, 400)
         Assertions.assert_response_content(response3, 'Invalid email format')
 
+        # GET USER, CHECK THAT EMAIL HASN'T BEEN EDITED
+        response4 = MyRequests.get(
+            url=get_uri_with_user_id(self.get_user_uri, user_id),
+            headers={'x-csrf-token': token},
+            cookies={'auth_sid': auth_sid}
+        )
+        Assertions.assert_json_value_by_name(
+            response4,
+            "email",
+            email,
+            "Email shouldn't have been changed"
+        )
+
     def test_edit_first_name_put_too_short_value(self):
         # REGISTER
 
@@ -178,6 +233,7 @@ class TestUserEdit(BaseCase):
         email = register_data['email']
         password = register_data['password']
         user_id = register_data['user_id']
+        first_name = register_data['firstName']
 
         # LOGIN
         login_data = {
@@ -204,3 +260,17 @@ class TestUserEdit(BaseCase):
                                              'error',
                                              "Too short value for field firstName",
                                              "Wrong error message")
+
+        # GET USER, CHECK THAT FIRST NAME HASN'T BEEN EDITED
+        response4 = MyRequests.get(
+            url=get_uri_with_user_id(self.get_user_uri, user_id),
+            headers={'x-csrf-token': token},
+            cookies={'auth_sid': auth_sid}
+        )
+
+        Assertions.assert_json_value_by_name(
+            response4,
+            "firstName",
+            first_name,
+            "First name shouldn't have been changed"
+        )
